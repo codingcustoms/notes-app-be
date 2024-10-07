@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 
 const { Schema } = mongoose;
 
+const socialAccountSchema = new Schema(
+  {
+    provider: String,
+    providerId: String,
+  },
+  { timestamps: true },
+);
+
 const userSchema = new Schema(
   {
     firstName: String,
@@ -14,12 +22,4 @@ const userSchema = new Schema(
   { timestamps: true },
 );
 
-const socialAccountSchema = new Schema(
-  {
-    provider: String,
-    providerId: String,
-  },
-  { timestamps: true },
-);
-
-export const UserSchema = mongoose.model("user", userSchema);
+export const UserModel = mongoose.model("user", userSchema);

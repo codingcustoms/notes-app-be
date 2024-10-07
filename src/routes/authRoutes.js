@@ -1,12 +1,12 @@
-import { AuthController } from "../controllers/index.js";
-import express from "express";
-import { validatorMiddleWare } from "../middlewares/index.js";
-import { signInSchema } from "../validations/index.js";
+import { AuthController } from '../controllers/index.js';
+import express from 'express';
+import { validatorMiddleWare } from '../middlewares/index.js';
+import { signInSchema } from '../validations/index.js';
 
 const router = express.Router();
 
 router.post(
-  "/signIn",
+  '/signIn',
   validatorMiddleWare(signInSchema),
   AuthController.signIn,
 );

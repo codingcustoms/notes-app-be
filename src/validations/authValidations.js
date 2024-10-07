@@ -1,4 +1,4 @@
-import Joi from "joi";
+import Joi from 'joi';
 
 const email = Joi.string().email().trim().required();
 const password = Joi.string().alphanum().trim().min(5).max(15).required();

@@ -1,4 +1,4 @@
-import { validateRequests } from "../utils/app.js";
+import { validateRequests } from '../utils/app.js';
 
 export const validatorMiddleWare =
   (validationSchema, options = { warnings: true }) =>

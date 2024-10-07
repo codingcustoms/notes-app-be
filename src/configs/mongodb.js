@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 // # https://www.mongodb.com/docs/atlas/troubleshoot-connection/#special-characters-in-connection-string-password
 const username = encodeURIComponent(process.env.MONGO_DB_USERNAME);

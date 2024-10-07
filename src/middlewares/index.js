@@ -1,1 +1,1 @@
-export { validatorMiddleWare } from "./validatorMiddleware.js";
+export { validatorMiddleWare } from './validatorMiddleware.js';

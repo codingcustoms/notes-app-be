@@ -10,6 +10,7 @@ const port = process.env.PORT ?? 3000;
 
 // routes
 app.use('/auth', AuthRoutes);
+// app.use('/notes', AuthRoutes);
 
 app.listen(port, () => {
   console.log(`Api listening on port ${port}`);

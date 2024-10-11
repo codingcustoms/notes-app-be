@@ -25,7 +25,7 @@ export const signIn = async (req, res) => {
   }
 };
 
-export const singUp = async (req, res) => {
+export const signUp = async (req, res) => {
   try {
     const { body } = req;
 
@@ -86,3 +86,7 @@ export const socialAuth = async (req, res) => {
     return res.status(500).json(error);
   }
 };
+
+// export const addNote = async (req, res) => {
+//   const { body } = req.body;
+// };

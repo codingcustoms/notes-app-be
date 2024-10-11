@@ -1,7 +1,7 @@
-import { AuthController } from '../controllers/index.js';
 import express from 'express';
+import { AuthController } from '../controllers/index.js';
 import { validatorMiddleWare } from '../middlewares/index.js';
-import { signInSchema } from '../validations/index.js';
+import { signInSchema, signUpSchema } from '../validations/index.js';
 
 const router = express.Router();
 
@@ -10,5 +10,13 @@ router.post(
   validatorMiddleWare(signInSchema),
   AuthController.signIn,
 );
+
+router.post(
+  '/signUp',
+  validatorMiddleWare(signUpSchema),
+  AuthController.singUp,
+);
+
+router.post('/socialAuth', AuthController.socialAuth);
 
 export default router;

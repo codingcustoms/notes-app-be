@@ -1,1 +1,1 @@
-export { UserModel } from './userModel.js';
+export { UserModel, SocialAuthModel } from './userModel.js';

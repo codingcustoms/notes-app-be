@@ -4,8 +4,9 @@ const { Schema } = mongoose;
 
 const socialAccountSchema = new Schema(
   {
+    userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
     provider: { type: String, required: true },
-    providerId: { type: String, unique: true, required: true },
+    providerId: { type: String, unique: true, sparse: true, required: true },
   },
   { timestamps: true },
 );
@@ -19,7 +20,6 @@ const userSchema = new Schema(
     password: {
       type: String,
     },
-    socialAccounts: [socialAccountSchema],
   },
   { timestamps: true },
 );

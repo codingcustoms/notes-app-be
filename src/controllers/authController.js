@@ -12,6 +12,13 @@ export const signIn = async (req, res) => {
     if (!user)
       return res.status(404).send('No user found against given email!');
 
+    if (!user.password && user.socialAccounts.length)
+      return res
+        .status(400)
+        .send(
+          'It looks like you signed up using one of the social accounts. Use the providers below to login',
+        );
+
     const isMatch = await comparePassword(password, user.password);
 
     if (!isMatch)
@@ -62,26 +69,24 @@ export const socialAuth = async (req, res) => {
     const { provider, providerId, ...rest } = body;
 
     // https://www.mongodb.com/docs/manual/reference/operator/query/elemMatch/
-    const accountExists = await UserModel.findOne({
-      email: rest.email,
-    })
-      .where('socialAccounts')
-      .elemMatch({ providerId });
+    const socialAccountExists = await SocialAuthModel.findOne({
+      providerId,
+      provider,
+    }).populate('userId');
 
-    if (accountExists) return res.status(200).json(accountExists);
+    if (socialAccountExists) return res.status(200).json(socialAccountExists);
 
-    const newUser = await UserModel({ ...rest });
+    const newUser = await UserModel.create({ ...rest });
 
     const newSocialAccount = await SocialAuthModel.create({
+      userId: newUser._id,
       provider,
       providerId,
     });
 
-    newUser.socialAccounts.push(newSocialAccount);
-
-    await newUser.save();
-
-    return res.status(201).json(newUser);
+    return res
+      .status(201)
+      .json({ user: newUser, socialAccount: newSocialAccount });
   } catch (error) {
     return res.status(500).json(error);
   }

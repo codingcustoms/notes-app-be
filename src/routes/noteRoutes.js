@@ -1,7 +1,14 @@
 import express from 'express';
+import { notesController } from '../controllers/index.js';
 import { validatorMiddleWare } from '../middlewares/index.js';
-import { NotesModel } from '../models/notesModel.js';
+import { createNoteSchema } from '../validations/index.js';
 
 const router = express.Router();
 
-router.post('/notes', validatorMiddleWare(NotesModel));
+router.post(
+  '/create-note',
+  validatorMiddleWare(createNoteSchema),
+  notesController.createNote,
+);
+
+export default router;

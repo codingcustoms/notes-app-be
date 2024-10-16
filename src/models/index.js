@@ -1,1 +1,2 @@
-export { UserModel, SocialAuthModel } from './userModel.js';
+export { NotesModel } from './notesModel.js';
+export { SocialAuthModel, UserModel } from './userModel.js';

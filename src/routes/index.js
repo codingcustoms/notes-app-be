@@ -1,4 +1,4 @@
 import AuthRoutes from './authRoutes.js';
-import noteRoutes from './noteRoutes.js';
+import NoteRoutes from './noteRoutes.js';
 
-export { AuthRoutes, noteRoutes };
+export { AuthRoutes, NoteRoutes };

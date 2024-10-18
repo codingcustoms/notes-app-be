@@ -1,7 +1,7 @@
 import cors from 'cors';
 import 'dotenv/config';
 import express from 'express';
-import { AuthRoutes } from '../routes/index.js';
+import { AuthRoutes, NoteRoutes } from '../routes/index.js';
 import passport from './passport.js';
 
 const app = express();
@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
 
 // routes
 app.use('/auth', AuthRoutes);
-// app.use('/notes', AuthRoutes);
+app.use('/notes', NoteRoutes);
 
 app.listen(port, () => {
   console.log(`API listening on port ${port}`);

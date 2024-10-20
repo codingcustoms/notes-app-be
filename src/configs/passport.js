@@ -1,14 +1,14 @@
 import passport from 'passport';
-import ls from 'passport-local';
+import localStrategy from 'passport-local';
 import { UserModel } from '../models/index.js';
 import { comparePassword } from '../utils/app.js';
 
 passport.use(
-  new ls.Strategy(
+  new localStrategy.Strategy(
     { usernameField: 'email', passwordField: 'password' },
     async (email, password, done) => {
       try {
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ email }).lean();
 
         if (!user)
           return done(null, false, {

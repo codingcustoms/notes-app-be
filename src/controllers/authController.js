@@ -1,11 +1,13 @@
 import passport from 'passport';
 import { SocialAuthModel, UserModel } from '../models/index.js';
 import { hashPassword } from '../utils/app.js';
+import { generateAccessToken } from '../utils/jwt.utils.js';
 
 export const signIn = async (req, res, next) => {
   try {
-    passport.authenticate('local', { session: false }, (err, user, info) => {
-      return res.status(200).json({ err, user, info });
+    passport.authenticate('local', { session: false }, (_err, user) => {
+      return res.status(200).json({ user, ...generateAccessToken(user) });
+      // return res.status(200).json({ user });
     })(req, res, next);
   } catch (error) {
     return res.status(500).json(error);
@@ -37,7 +39,7 @@ export const signUp = async (req, res) => {
 
     return res
       .status(201)
-      .json({ user: newUser, message: 'User signed up successfully!!' });
+      .json({ user: newUser, ...generateAccessToken(newUser) });
   } catch (error) {
     return res.status(500).json(error);
   }
@@ -54,7 +56,11 @@ export const socialAuth = async (req, res) => {
       provider,
     }).populate('userId');
 
-    if (socialAccountExists) return res.status(200).json(socialAccountExists);
+    if (socialAccountExists)
+      return res.status(200).json({
+        user: socialAccountExists,
+        ...generateAccessToken(socialAccountExists),
+      });
 
     const newUser = await UserModel.create({ ...rest });
 
@@ -64,9 +70,11 @@ export const socialAuth = async (req, res) => {
       providerId,
     });
 
-    return res
-      .status(201)
-      .json({ user: newUser, socialAccount: newSocialAccount });
+    return res.status(201).json({
+      user: newUser,
+      socialAccount: newSocialAccount,
+      ...generateAccessToken(newUser),
+    });
   } catch (error) {
     return res.status(500).json(error);
   }

@@ -7,7 +7,7 @@ export const createNoteSchema = Joi.object({
 }).custom((values, helpers) => {
   // console.log({ values, helpers });
   if (!values.title && !values.content) {
-    return helpers.message('Either title or content must be provided.');
+    return helpers.message('Either title or content must be provided');
   }
   return values;
 });

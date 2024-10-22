@@ -9,7 +9,9 @@ let uri = `mongodb+srv://${username}:${password}@${process.env.MONGO_DB_CLUSTER_
 main().catch((err) => console.log(err));
 
 async function main() {
-  await mongoose.connect(uri);
+  await mongoose.connect(uri).then(() => {
+    console.log('Connected to database');
+  });
 
   // use `await mongoose.connect('mongodb://user:password@127.0.0.1:27017/test');` if your database has auth enabled
 }

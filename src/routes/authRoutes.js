@@ -14,7 +14,7 @@ router.post(
 router.post(
   '/signUp',
   validatorMiddleWare(signUpSchema),
-  AuthController.singUp,
+  AuthController.signUp,
 );
 
 router.post('/socialAuth', AuthController.socialAuth);

@@ -1,38 +1,20 @@
+import passport from 'passport';
 import { SocialAuthModel, UserModel } from '../models/index.js';
-import { comparePassword, hashPassword } from '../utils/app.js';
+import { hashPassword } from '../utils/app.js';
+import { generateAccessToken } from '../utils/jwt.utils.js';
 
-export const signIn = async (req, res) => {
+export const signIn = async (req, res, next) => {
   try {
-    const { body } = req;
-
-    const { password, email } = body;
-
-    const user = await UserModel.findOne({ email });
-
-    if (!user)
-      return res.status(404).send('No user found against given email!');
-
-    if (!user.password && user.socialAccounts.length)
-      return res
-        .status(400)
-        .send(
-          'It looks like you signed up using one of the social accounts. Use the providers below to login',
-        );
-
-    const isMatch = await comparePassword(password, user.password);
-
-    if (!isMatch)
-      return res.status(400).send('Provided password is incorrect!');
-
-    return res
-      .status(200)
-      .json({ user, message: 'User logged in successfully!!' });
+    passport.authenticate('local', { session: false }, (_err, user) => {
+      return res.status(200).json({ user, ...generateAccessToken(user) });
+      // return res.status(200).json({ user });
+    })(req, res, next);
   } catch (error) {
     return res.status(500).json(error);
   }
 };
 
-export const singUp = async (req, res) => {
+export const signUp = async (req, res) => {
   try {
     const { body } = req;
 
@@ -57,7 +39,7 @@ export const singUp = async (req, res) => {
 
     return res
       .status(201)
-      .json({ user: newUser, message: 'User signed up successfully!!' });
+      .json({ user: newUser, ...generateAccessToken(newUser) });
   } catch (error) {
     return res.status(500).json(error);
   }
@@ -74,7 +56,11 @@ export const socialAuth = async (req, res) => {
       provider,
     }).populate('userId');
 
-    if (socialAccountExists) return res.status(200).json(socialAccountExists);
+    if (socialAccountExists)
+      return res.status(200).json({
+        user: socialAccountExists,
+        ...generateAccessToken(socialAccountExists),
+      });
 
     const newUser = await UserModel.create({ ...rest });
 
@@ -84,9 +70,11 @@ export const socialAuth = async (req, res) => {
       providerId,
     });
 
-    return res
-      .status(201)
-      .json({ user: newUser, socialAccount: newSocialAccount });
+    return res.status(201).json({
+      user: newUser,
+      socialAccount: newSocialAccount,
+      ...generateAccessToken(newUser),
+    });
   } catch (error) {
     return res.status(500).json(error);
   }

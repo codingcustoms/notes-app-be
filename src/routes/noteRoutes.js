@@ -1,5 +1,5 @@
 import express from 'express';
-import { notesController } from '../controllers/index.js';
+import { NotesController } from '../controllers/index.js';
 import { validatorMiddleWare } from '../middlewares/index.js';
 import { createNoteSchema, updateNoteSchema } from '../validations/index.js';
 
@@ -8,7 +8,7 @@ const router = express.Router();
 router.post(
   '/create-note',
   validatorMiddleWare(createNoteSchema),
-  notesController.createNote,
+  NotesController.createNote,
 );
 router.get(
   '/update-note/:id',

@@ -5,18 +5,17 @@ import { createNoteSchema, updateNoteSchema } from '../validations/index.js';
 
 const router = express.Router();
 
-router.post(
-  '/create-note',
-  validatorMiddleWare(createNoteSchema),
-  NotesController.createNote,
-);
-router.get(
-  '/update-note/:id',
-  validatorMiddleWare(updateNoteSchema),
-  notesController.updateNote,
-);
-router.get('/all-notes', notesController.getAllNotes);
-router.get('/get-note/:id', notesController.getOneNoteById);
-router.delete('/delete-note/:id', notesController.deleteNote);
+router
+  .route('/')
+  .post(validatorMiddleWare(createNoteSchema), NotesController.createNote)
+  .get(NotesController.getAllNotes);
+
+router.get('/togglePinned/:id', NotesController.togglePinNote);
+
+router
+  .route('/:id')
+  .get(NotesController.getOneNoteById)
+  .patch(validatorMiddleWare(updateNoteSchema), NotesController.updateNote)
+  .delete(NotesController.deleteNote);
 
 export default router;

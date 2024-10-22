@@ -10,7 +10,7 @@ export const validatorMiddleWare =
         options,
       );
 
-      req.body = validatedData.value || validatedData.values || req.body;
+      req.body = validatedData.value;
 
       next();
     } catch (e) {

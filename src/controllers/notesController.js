@@ -10,7 +10,7 @@ export const createNote = async (req, res) => {
     const note = await NotesModel.create({
       title,
       content,
-      tags: tags || [],
+      tags: tags,
       userId: userId,
     });
 
@@ -82,6 +82,28 @@ export const deleteNote = async (req, res) => {
       return res.status(404).json({ message: 'No note found' });
     }
     return res.status(200).json({ message: 'Note deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ error });
+  }
+};
+
+// pin/unpin note API
+export const togglePinNote = async (req, res) => {
+  const { id } = req.params;
+  const userId = req.user._id;
+
+  try {
+    const note = await NotesModel.findOne({ _id: id, userId });
+
+    if (!note) {
+      return res.status(404).json({ message: 'No note found' });
+    }
+
+    note.isPinned = !note.isPinned;
+
+    note.save();
+
+    return res.status(200).json(note);
   } catch (error) {
     return res.status(500).json({ error });
   }

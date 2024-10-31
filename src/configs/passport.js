@@ -1,6 +1,7 @@
 import passport from 'passport';
+import GoogleStrategy from 'passport-google-oauth20';
 import localStrategy from 'passport-local';
-import { UserModel } from '../models/index.js';
+import { SocialAuthModel, UserModel } from '../models/index.js';
 import { comparePassword } from '../utils/app.js';
 
 passport.use(
@@ -29,6 +30,44 @@ passport.use(
           });
 
         return done(null, user);
+      } catch (error) {
+        return done(error);
+      }
+    },
+  ),
+);
+
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL:
+        process.env.GOOGLE_CALLBACK_URL ||
+        'http://localhost:8000/auth/google/callback',
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        // Check if the social account already exists
+        let socialAccount = await SocialAuthModel.findOne({
+          providerId: profile.id,
+        }).populate('userId');
+
+        // Create a new user if not found
+        if (!socialAccount) {
+          const newUser = await UserModel.create({
+            email: profile.emails[0].value,
+          });
+
+          // Create the social account entry linked to the user
+          socialAccount = await SocialAuthModel.create({
+            userId: newUser._id,
+            provider: 'google',
+            providerId: profile.id,
+          });
+        }
+
+        return done(null, socialAccount);
       } catch (error) {
         return done(error);
       }

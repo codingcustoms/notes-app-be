@@ -17,6 +17,6 @@ router.post(
   AuthController.signUp,
 );
 
-router.post('/socialAuth', AuthController.socialAuth);
+router.post('/social', AuthController.socialAuth);
 
 export default router;

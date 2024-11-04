@@ -1,5 +1,5 @@
 import passport from 'passport';
-import { SocialAuthModel, UserModel } from '../models/index.js';
+import { UserModel } from '../models/index.js';
 import { hashPassword } from '../utils/app.js';
 import { generateAccessToken } from '../utils/jwt.utils.js';
 
@@ -7,7 +7,6 @@ export const signIn = async (req, res, next) => {
   try {
     passport.authenticate('local', { session: false }, (_err, user) => {
       return res.status(200).json({ user, ...generateAccessToken(user) });
-      // return res.status(200).json({ user });
     })(req, res, next);
   } catch (error) {
     return res.status(500).json(error);
@@ -45,37 +44,44 @@ export const signUp = async (req, res) => {
   }
 };
 
-export const socialAuth = async (req, res) => {
+export const socialAuth = async (req, res, next) => {
   try {
     const { body } = req;
-    const { provider, providerId, ...rest } = body;
+    console.log(body);
 
-    // https://www.mongodb.com/docs/manual/reference/operator/query/elemMatch/
-    const socialAccountExists = await SocialAuthModel.findOne({
-      providerId,
-      provider,
-    }).populate('userId');
+    passport.authenticate('google', { session: false }, (err, user) => {
+      if (err) {
+        return res
+          .status(500)
+          .json({ message: 'Authentication error', error: err });
+      }
+      if (!user) {
+        return res.status(400).json({ message: 'User not authenticated' });
+      }
 
-    if (socialAccountExists)
-      return res.status(200).json({
-        user: socialAccountExists,
-        ...generateAccessToken(socialAccountExists),
-      });
+      const tokenData = generateAccessToken(user);
 
-    const newUser = await UserModel.create({ ...rest });
-
-    const newSocialAccount = await SocialAuthModel.create({
-      userId: newUser._id,
-      provider,
-      providerId,
-    });
-
-    return res.status(201).json({
-      user: newUser,
-      socialAccount: newSocialAccount,
-      ...generateAccessToken(newUser),
-    });
+      return res.status(200).json({ user, ...tokenData });
+    })(req, res, next);
   } catch (error) {
     return res.status(500).json(error);
   }
 };
+
+// export const socialAuth = async (req, res, next) => {
+//   try {
+//     passport.authenticate(
+//       'google',
+//       { scope: ['profile', 'email'] },
+//       (err, user) => {
+//         if (err) return res.status(500).json(err);
+//         if (!user)
+//           return res.status(400).json({ message: 'User not authenticated' });
+
+//         return res.status(200).json({ user, ...generateAccessToken(user) });
+//       },
+//     )(req, res, next);
+//   } catch (error) {
+//     return res.status(500).json(error);
+//   }
+// };

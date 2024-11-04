@@ -11,6 +11,7 @@ router
   .get(NotesController.getAllNotes);
 
 router.get('/togglePinned/:id', NotesController.togglePinNote);
+router.get('/:id', NotesController.softDeleteNote);
 
 router
   .route('/:id')

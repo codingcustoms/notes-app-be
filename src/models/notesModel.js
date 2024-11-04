@@ -9,6 +9,7 @@ const notesSchema = new Schema(
     tags: { type: [String], default: [] },
     isPinned: { type: Boolean },
     userId: { type: Schema.Types.ObjectId, ref: 'users', required: true },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

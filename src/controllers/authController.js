@@ -6,7 +6,7 @@ import { generateAccessToken } from '../utils/jwt.utils.js';
 export const signIn = async (req, res, next) => {
   try {
     passport.authenticate('local', { session: false }, (_err, user) => {
-      return res.status(200).json({ user, ...generateAccessToken(user) });
+      res.status(200).json({ user, ...generateAccessToken(user) });
     })(req, res, next);
   } catch (error) {
     return res.status(500).json(error);
@@ -20,8 +20,7 @@ export const signUp = async (req, res) => {
     const { password, ...restUser } = body;
 
     const userExists = await UserModel.exists({
-      email: body.email,
-      username: body.username,
+      $or: [{ email: body.email }, { username: body.username }],
     });
 
     if (userExists)
@@ -34,7 +33,7 @@ export const signUp = async (req, res) => {
     const newUser = await UserModel.create({
       ...restUser,
       password: hashedPassword,
-    });
+    }).lean();
 
     return res
       .status(201)

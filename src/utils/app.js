@@ -12,3 +12,12 @@ export const comparePassword = async (password, hash) => {
 
 export const validateRequests = async (schema, data, options) =>
   await schema.validateAsync(data, options);
+
+export const calculateSkip = (page, limit) =>
+  ((page <= 0 ? 1 : page) - 1) * limit;
+
+export const calculatePaginationProps = (count, limit) => {
+  const totalPages = Math.ceil(count / limit);
+
+  return { totalItems: count, totalPages };
+};

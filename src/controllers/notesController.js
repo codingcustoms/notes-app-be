@@ -1,4 +1,5 @@
 import { NotesModel } from '../models/index.js';
+import { calculatePaginationProps, calculateSkip } from '../utils/app.js';
 
 // create note API
 export const createNote = async (req, res) => {
@@ -22,13 +23,32 @@ export const createNote = async (req, res) => {
 
 // get all notes API
 export const getAllNotes = async (req, res) => {
-  const userId = req.user._id;
-
   try {
-    const notes = await NotesModel.find({ userId, deletedAt: null }).sort({
-      updatedAt: 'desc',
-    });
-    return res.status(200).json(notes);
+    const userId = req.user._id;
+    const search = req.query?.search ?? '';
+    const page = req.query?.page ?? 1;
+    const limit = req.query?.limit ?? 10;
+
+    const notes = await NotesModel.find({
+      userId,
+      deletedAt: null,
+      $or: [
+        { title: { $regex: search, $options: 'i' } },
+        { content: { $regex: search, $options: 'i' } },
+        { tags: { $elemMatch: { $regex: search, $options: 'i' } } },
+      ],
+    })
+      .sort({
+        updatedAt: 'desc',
+      })
+      .skip(calculateSkip(page, limit))
+      .limit(limit);
+
+    const count = await NotesModel.countDocuments({ userId, deletedAt: null });
+
+    return res
+      .status(200)
+      .json({ notes, ...calculatePaginationProps(count, limit) });
   } catch (error) {
     return res.status(500).json({ error });
   }
@@ -54,12 +74,12 @@ export const getOneNoteById = async (req, res) => {
 export const updateNote = async (req, res) => {
   const { id } = req.params;
   const userId = req.user._id;
-  const { title, content, tags, isPinned } = req.body;
+  const { title, content, tags } = req.body;
 
   try {
     const note = await NotesModel.findByIdAndUpdate(
       { _id: id, userId },
-      { title, content, tags, isPinned },
+      { title, content, tags },
       { new: true },
     );
 
@@ -73,48 +93,55 @@ export const updateNote = async (req, res) => {
   }
 };
 
-// soft delete note API
-export const softDeleteNote = async (req, res) => {
+// delete note API
+export const deleteNote = async (req, res) => {
+  const query = req.query;
   const { id } = req.params;
   const userId = req.user._id;
 
   try {
-    const note = await NotesModel.findOne({ _id: id, userId });
+    const note = await NotesModel.findOne({
+      _id: id,
+      userId,
+    });
 
     if (!note) {
       return res.status(404).json({ message: 'No note found' });
     }
 
-    note.deletedAt = new Date();
-    await note.save();
+    if (query?.permanent) await NotesModel.deleteOne({ _id: id, userId });
+    else {
+      note.deletedAt = new Date();
+      await note.save();
+    }
 
-    return res.status(200).json({ note, message: 'Note moved to trash' });
+    return res.status(200).json(note);
   } catch (error) {
     return res.status(500).json({ error });
   }
 };
 
-// delete note API
-export const deleteNote = async (req, res) => {
-  const { id } = req.params;
-  const userId = req.user._id;
+// // delete note API
+// export const deleteNote = async (req, res) => {
+//   const { id } = req.params;
+//   const userId = req.user._id;
 
-  try {
-    const note = await NotesModel.findOneAndDelete({
-      _id: id,
-      userId,
-      deletedAt: { $ne: null },
-    });
+//   try {
+//     const note = await NotesModel.findOneAndDelete({
+//       _id: id,
+//       userId,
+//       deletedAt: { $ne: null },
+//     });
 
-    if (!note) {
-      return res.status(404).json({ message: 'No note found in trash' });
-    }
+//     if (!note) {
+//       return res.status(404).json({ message: 'No note found in trash' });
+//     }
 
-    return res.status(200).json({ message: 'Note deleted successfully' });
-  } catch (error) {
-    return res.status(500).send(error);
-  }
-};
+//     return res.status(200).json({ message: 'Note deleted successfully' });
+//   } catch (error) {
+//     return res.status(500).send(error);
+//   }
+// };
 
 // pin/unpin note API
 export const togglePinNote = async (req, res) => {

@@ -20,6 +20,7 @@ const userSchema = new Schema(
     password: {
       type: String,
     },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );

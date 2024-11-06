@@ -1,4 +1,37 @@
 import { UserModel } from '../models/index.js';
+import { hashPassword } from '../utils/app.js';
+import { generateAccessToken } from '../utils/jwt.utils.js';
+
+// create user
+export const createUser = async (req, res) => {
+  try {
+    const { body } = req;
+
+    const { password, ...restUser } = body;
+
+    const userExists = await UserModel.exists({
+      $or: [{ email: body.email }, { username: body.username }],
+    });
+
+    if (userExists)
+      return res
+        .status(400)
+        .send('User already exists against given email or username');
+
+    const hashedPassword = await hashPassword(password);
+
+    const newUser = await UserModel.create({
+      ...restUser,
+      password: hashedPassword,
+    });
+
+    return res
+      .status(201)
+      .json({ user: newUser, ...generateAccessToken(newUser.toObject()) });
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+};
 
 // get all users
 export const getAllUser = async (req, res) => {

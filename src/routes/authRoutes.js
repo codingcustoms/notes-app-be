@@ -1,5 +1,5 @@
 import express from 'express';
-import { AuthController } from '../controllers/index.js';
+import { AuthController, UserController } from '../controllers/index.js';
 import { validatorMiddleWare } from '../middlewares/index.js';
 import { signInSchema, signUpSchema } from '../validations/index.js';
 
@@ -14,9 +14,11 @@ router.post(
 router.post(
   '/signUp',
   validatorMiddleWare(signUpSchema),
-  AuthController.signUp,
+  UserController.createUser,
 );
 
 router.post('/social', AuthController.socialAuth);
+
+router.post('logout', AuthController.logOut);
 
 export default router;

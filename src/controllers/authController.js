@@ -1,6 +1,4 @@
 import passport from 'passport';
-import { UserModel } from '../models/index.js';
-import { hashPassword } from '../utils/app.js';
 import { generateAccessToken } from '../utils/jwt.utils.js';
 
 export const signIn = async (req, res, next) => {
@@ -8,36 +6,6 @@ export const signIn = async (req, res, next) => {
     passport.authenticate('local', { session: false }, (_err, user) => {
       res.status(200).json({ user, ...generateAccessToken(user) });
     })(req, res, next);
-  } catch (error) {
-    return res.status(500).json(error);
-  }
-};
-
-export const signUp = async (req, res) => {
-  try {
-    const { body } = req;
-
-    const { password, ...restUser } = body;
-
-    const userExists = await UserModel.exists({
-      $or: [{ email: body.email }, { username: body.username }],
-    });
-
-    if (userExists)
-      return res
-        .status(400)
-        .send('User already exists against given email or username');
-
-    const hashedPassword = await hashPassword(password);
-
-    const newUser = await UserModel.create({
-      ...restUser,
-      password: hashedPassword,
-    }).lean();
-
-    return res
-      .status(201)
-      .json({ user: newUser, ...generateAccessToken(newUser) });
   } catch (error) {
     return res.status(500).json(error);
   }
@@ -66,6 +34,8 @@ export const socialAuth = async (req, res, next) => {
     return res.status(500).json(error);
   }
 };
+
+export const logOut = async () => {};
 
 // export const socialAuth = async (req, res, next) => {
 //   try {
